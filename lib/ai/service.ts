@@ -26,7 +26,13 @@ export class AiService {
   }
 
   async generateProjectTitle(prompt: string, apiKey: string): Promise<string> {
-    if (!apiKey) throw new Error("API Key missing");
+    if (!apiKey || apiKey.trim().length === 0) {
+      throw new Error("Gemini API Key is missing. Please add your API key in Global Settings to generate titles.");
+    }
+    
+    if (!apiKey.startsWith('AIza')) {
+      throw new Error("Invalid Gemini API Key format. Your API key should start with 'AIza'. Please verify your API key.");
+    }
     
     const client = this.getClient(apiKey);
     const systemPrompt = `
@@ -59,7 +65,13 @@ export class AiService {
     images?: string[],
     onStream?: (chunk: string) => void
   ): Promise<FileAsset[]> {
-    if (!apiKey) throw new Error("API Key missing");
+    if (!apiKey || apiKey.trim().length === 0) {
+      throw new Error("Gemini API Key is missing. Please add your API key in Global Settings to generate code.");
+    }
+    
+    if (!apiKey.startsWith('AIza')) {
+      throw new Error("Invalid Gemini API Key format. Your API key should start with 'AIza'. Please verify your API key in Global Settings.");
+    }
 
     const client = this.getClient(apiKey);
     const modelId = settings.model || DEFAULT_MODEL;

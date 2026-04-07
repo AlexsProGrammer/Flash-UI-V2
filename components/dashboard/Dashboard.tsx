@@ -95,8 +95,16 @@ export const Dashboard = () => {
         if (!activeProject) return;
 
         const apiKey = globalSettings.apiKeys.gemini;
-        if (!apiKey) {
-            toast.error("Gemini API Key missing");
+        
+        // Comprehensive API key validation
+        if (!apiKey || apiKey.trim().length === 0) {
+            toast.error("Gemini API Key is required. Please add it in Settings.");
+            toggleSettingsModal(true);
+            return;
+        }
+        
+        if (!apiKey.startsWith('AIza')) {
+            toast.error("Invalid API Key format. It should start with 'AIza'. Please check Settings.");
             toggleSettingsModal(true);
             return;
         }
@@ -150,8 +158,24 @@ ${activeProject.globalSettings.theme ? `**Theme:** ${activeProject.globalSetting
 
         } catch (e) {
             console.error(e);
-            updateVariantStatus(activeProject.id, variantId, 'error', "// Error generating.");
-            toast.error("Failed to generate design.");
+            const errorMessage = e instanceof Error ? e.message : "Unknown error occurred";
+            
+            // Check if it's an API key issue
+            if (errorMessage.includes("API Key") || errorMessage.includes("apiKey")) {
+                updateVariantStatus(activeProject.id, variantId, 'error', "// Error: Missing or invalid API Key.\n// Please check your Gemini API Key in Settings.");
+                toast.error(errorMessage);
+                toggleSettingsModal(true);
+            } else if (errorMessage.includes("401") || errorMessage.includes("403") || errorMessage.includes("Unauthorized")) {
+                updateVariantStatus(activeProject.id, variantId, 'error', "// Error: API Key is invalid or unauthorized.\n// Please verify your API Key in Settings.");
+                toast.error("API Key is invalid. Please check your API key in Settings.");
+                toggleSettingsModal(true);
+            } else if (errorMessage.includes("quota")) {
+                updateVariantStatus(activeProject.id, variantId, 'error', "// Error: API quota exceeded. Please try again later.");
+                toast.error("API quota exceeded. Please try again later.");
+            } else {
+                updateVariantStatus(activeProject.id, variantId, 'error', "// Error generating code. Please check your API Key and try again.");
+                toast.error("Failed to generate design. Please check your API Key.");
+            }
         }
     };
 
