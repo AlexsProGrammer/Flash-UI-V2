@@ -86,7 +86,7 @@ export interface GlobalSettings {
         openrouter?: string;
     };
     theme: ThemeMode;
-    customModels: string[];
+    models: Record<string, string>; // { "model-id": "Display Name" }
 }
 
 export interface AppState {

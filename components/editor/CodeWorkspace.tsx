@@ -10,7 +10,7 @@ import {
     FileCode, FileType, Play, Check, Copy, X, FolderOpen, Save
 } from 'lucide-react';
 import { cn } from '../../utils';
-import { toast } from 'sonner';
+import { showSuccess } from '../../utils/toastNotifications';
 
 export const CodeWorkspace = () => {
     const { projects, activeProjectId, updateFile, toggleFileOpen, setActiveFile, setEditorMode, saveCheckpoint } = useProjectStore();
@@ -41,7 +41,7 @@ export const CodeWorkspace = () => {
     const handleCopy = () => {
         if (currentFile) {
             navigator.clipboard.writeText(currentFile.content);
-            toast.success("Code copied to clipboard");
+            showSuccess("Code copied to clipboard");
         }
     };
 
@@ -49,7 +49,7 @@ export const CodeWorkspace = () => {
         if (project && variant) {
              saveCheckpoint(project.id, variant.id, "Manual Save");
              // Force refresh preview by toggling editor mode briefly or relying on state update
-             toast.success("Saved & Snapshot created");
+             showSuccess("Saved & Snapshot created");
         }
     };
 

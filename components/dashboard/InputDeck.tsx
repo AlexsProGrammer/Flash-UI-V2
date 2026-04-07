@@ -9,11 +9,11 @@ import {
     Sparkles, Settings2, Trash2, Plus, Zap, Cpu, Dices, ChevronDown, LayoutTemplate, Palette, X, Edit2, Upload
 } from 'lucide-react';
 import { cn, generateId } from '../../utils';
-import { toast } from 'sonner';
+import { showSuccess, showError, showInfo } from '../../utils/toastNotifications';
 import { aiService } from '../../lib/ai/service';
 import { RANDOM_STYLES, INITIAL_PLACEHOLDERS } from '../../constants';
 import { importProjectFromJson } from '../../lib/export';
-import { AI_MODELS } from '../../config/models';
+import { convertModelsObjectToArray } from '../../utils/validateModels';
 
 const APP_TYPES = [
     { id: 'landing_page', label: 'Landing Page' },
@@ -93,10 +93,10 @@ export const InputDeck = () => {
             try {
                 const project = await importProjectFromJson(file);
                 importProject(project);
-                toast.success("Project imported successfully");
+                showSuccess("Project imported successfully");
             } catch (err) {
                 console.error(err);
-                toast.error("Failed to import project");
+                showError("✕ Failed to import project");
             }
         }
         // Reset input
@@ -144,18 +144,18 @@ export const InputDeck = () => {
         
         // Comprehensive API key validation
         if (!apiKey || apiKey.trim().length === 0) {
-            toast.error("Gemini API Key is required. Please add it in Settings.");
+            showError("✕ Gemini API Key is required. Please add it in Settings.");
             toggleSettingsModal(true);
             return;
         }
         
         if (!apiKey.startsWith('AIza')) {
-            toast.error("Invalid API Key format. It should start with 'AIza'. Please check Settings.");
+            showError("✕ Invalid API Key format. It should start with 'AIza'. Please check Settings.");
             toggleSettingsModal(true);
             return;
         }
 
-        toast.info("Generating Variants...");
+        showInfo("⟳ Generating Variants...");
         
         // Generate a creative title for the project
         aiService.generateProjectTitle(activeProject.prompt, apiKey)
@@ -165,7 +165,7 @@ export const InputDeck = () => {
             .catch(err => {
                 console.error("Title generation failed", err);
                 if (err.message.includes("API Key")) {
-                    toast.error(err.message);
+                    showError("✕ " + err.message);
                     toggleSettingsModal(true);
                 }
             });
@@ -225,18 +225,18 @@ ${activeProject.globalSettings.colors?.length ? `**Brand Colors:** ${activeProje
                 // Check if it's an API key issue
                 if (errorMessage.includes("API Key") || errorMessage.includes("apiKey")) {
                     updateVariantStatus(activeProject.id, variantId, 'error', "// Error: Missing or invalid API Key.\n// Please check your Gemini API Key in Settings.");
-                    toast.error(errorMessage);
+                    showError("✕ " + errorMessage);
                     toggleSettingsModal(true);
                 } else if (errorMessage.includes("401") || errorMessage.includes("403") || errorMessage.includes("Unauthorized")) {
                     updateVariantStatus(activeProject.id, variantId, 'error', "// Error: API Key is invalid or unauthorized.\n// Please verify your API Key in Settings.");
-                    toast.error("API Key is invalid. Please check your API key in Settings.");
+                    showError("✕ API Key is invalid. Please check your API key in Settings.");
                     toggleSettingsModal(true);
                 } else if (errorMessage.includes("quota")) {
                     updateVariantStatus(activeProject.id, variantId, 'error', "// Error: API quota exceeded. Please try again later.");
-                    toast.error("API quota exceeded. Please try again later.");
+                    showError("✕ API quota exceeded. Please try again later.");
                 } else {
                     updateVariantStatus(activeProject.id, variantId, 'error', "// Error generating code. Please check your API Key and try again.");
-                    toast.error("Generation failed. Check API Key and try again.");
+                    showError("✕ Generation failed. Check API Key and try again.");
                 }
             }
         });
@@ -346,7 +346,7 @@ ${activeProject.globalSettings.colors?.length ? `**Brand Colors:** ${activeProje
                                 value={activeProject.globalSettings.model}
                                 onChange={(e) => updateProjectSettings(activeProject.id, { model: e.target.value })}
                             >
-                                {AI_MODELS.map(model => (
+                                {convertModelsObjectToArray(globalSettings.models).map(model => (
                                     <option key={model.id} value={model.id}>{model.name}</option>
                                 ))}
                             </select>

@@ -9,6 +9,8 @@ import { AppState, Project, Variant, GlobalSettings, ArtifactCardConfig, Generat
 import { generateId } from './utils';
 import { DEFAULT_MODEL } from './config/models';
 import { RANDOM_STYLES } from './constants';
+import { convertModelsArrayToObject } from './utils/validateModels';
+import { AI_MODELS } from './config/models';
 
 function pickRandomStyles(count: number): string[] {
     const shuffled = [...RANDOM_STYLES].sort(() => Math.random() - 0.5);
@@ -50,9 +52,10 @@ interface ProjectStore extends AppState {
     removeCardConfig: (projectId: string, cardId: string) => void;
     updateProjectSettings: (projectId: string, settings: Partial<GenerationSettings>) => void;
 
-    // Settings
+// Settings Actions
     updateSettings: (updates: Partial<GlobalSettings>) => void;
     setApiKey: (provider: 'gemini' | 'openrouter', key: string) => void;
+    updateModels: (models: Record<string, string>) => void;
     toggleSettingsModal: (isOpen: boolean) => void;
 
     importProject: (project: Project) => void;
@@ -78,7 +81,18 @@ const INITIAL_SETTINGS: GlobalSettings = {
         openrouter: localStorage.getItem('flashui_openrouter_key') || ''
     },
     theme: 'dark',
-    customModels: []
+    models: (() => {
+        try {
+            const saved = localStorage.getItem('flashui_models');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (e) {
+            console.error('Failed to load models from localStorage', e);
+        }
+        // Return default models if not saved
+        return convertModelsArrayToObject(AI_MODELS);
+    })()
 };
 
 const DEFAULT_GEN_SETTINGS: GenerationSettings = {
@@ -414,6 +428,14 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         // Persist
         if (provider === 'gemini') localStorage.setItem('flashui_gemini_key', key);
         if (provider === 'openrouter') localStorage.setItem('flashui_openrouter_key', key);
+    },
+
+    updateModels: (models) => {
+        set(produce((state: AppState) => {
+            state.settings.models = models;
+        }));
+        // Persist
+        localStorage.setItem('flashui_models', JSON.stringify(models));
     },
 
     toggleSettingsModal: (isOpen) => {

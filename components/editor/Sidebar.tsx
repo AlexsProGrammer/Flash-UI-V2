@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { cn, generateId } from '../../utils';
 import { Variant } from '../../types';
-import { toast } from 'sonner';
+import { showSuccess, showError, showInfo } from '../../utils/toastNotifications';
 import { aiService } from '../../lib/ai/service';
 import { RANDOM_STYLES } from '../../constants';
 import { downloadVariantAsZip } from '../../lib/export';
@@ -83,7 +83,7 @@ export const Sidebar = () => {
 
          const apiKey = settings.apiKeys.gemini;
          if (!apiKey) {
-            toast.error("API Key missing");
+            showError("✗ API Key missing");
             return;
          }
 
@@ -124,7 +124,7 @@ export const Sidebar = () => {
          } catch (e) {
              console.error(e);
              updateVariantStatus(project.id, newId, 'error', "// Error processing fork");
-             toast.error("Forking failed");
+             showError("✗ Forking failed");
          }
     };
 
@@ -133,7 +133,7 @@ export const Sidebar = () => {
 
         const apiKey = settings.apiKeys.gemini;
         if (!apiKey) {
-           toast.error("API Key missing");
+           showError("✗ API Key missing");
            return;
         }
 
@@ -173,7 +173,7 @@ export const Sidebar = () => {
         } catch (e) {
             console.error(e);
             updateVariantStatus(project.id, newId, 'error', "// Mix Failed");
-            toast.error("Variation Failed");
+            showError("✗ Variation Failed");
         }
     };
 
@@ -183,7 +183,7 @@ export const Sidebar = () => {
         const apiKey = settings.apiKeys.gemini;
         
         if (!apiKey) {
-             toast.error("API Key missing");
+             showError("✗ API Key missing");
              return;
         }
 
@@ -212,12 +212,12 @@ export const Sidebar = () => {
             setFiles(project.id, newId, newFiles);
             updateVariantStatus(project.id, newId, 'idle');
             saveCheckpoint(project.id, newId, 'Full Build Generation');
-            toast.success("Full Build Complete");
+            showSuccess("Full Build Complete");
 
         } catch (e) {
             console.error(e);
             updateVariantStatus(project.id, newId, 'error', "// Build Failed");
-            toast.error("Full Build Failed");
+            showError("✗ Full Build Failed");
         }
     };
 
@@ -239,7 +239,7 @@ export const Sidebar = () => {
         e.stopPropagation(); setFileToDelete(fileName);
     };
     const confirmDeleteFile = () => {
-        if (variant && fileToDelete) { deleteFile(project.id, variant.id, fileToDelete); toast.success("File deleted"); setFileToDelete(null); }
+        if (variant && fileToDelete) { deleteFile(project.id, variant.id, fileToDelete); showSuccess("File deleted"); setFileToDelete(null); }
     };
     const startFileRename = (e: React.MouseEvent, fileName: string) => {
         e.stopPropagation(); setEditingFile(fileName); setEditFileName(fileName);
@@ -263,7 +263,7 @@ export const Sidebar = () => {
     const confirmDeleteVariant = () => {
         if (variantToDelete) {
             deleteVariant(project.id, variantToDelete);
-            toast.success("Variant deleted");
+            showSuccess("Variant deleted");
             setVariantToDelete(null);
         }
     };
@@ -359,7 +359,7 @@ export const Sidebar = () => {
                                     <div className="absolute right-0 top-8 w-48 bg-[#18181b] border border-white/10 rounded-lg shadow-xl z-50 py-1 overflow-hidden">
                                          <button onClick={(e) => { e.stopPropagation(); openForkModal(v.id); }} className="w-full text-left px-3 py-2 text-xs text-white/70 hover:bg-white/5 hover:text-white flex items-center gap-2"><GitBranch size={12} /> Fork Variant</button>
                                          <button onClick={(e) => { e.stopPropagation(); handleFullBuild(v.id); }} className="w-full text-left px-3 py-2 text-xs text-indigo-400 hover:bg-white/5 hover:text-indigo-300 flex items-center gap-2"><Zap size={12} /> Full Build</button>
-                                         <button onClick={(e) => { e.stopPropagation(); downloadVariantAsZip(v); toast.success("Downloading Zip..."); }} className="w-full text-left px-3 py-2 text-xs text-white/70 hover:bg-white/5 hover:text-white flex items-center gap-2"><Download size={12} /> Download Code</button>
+                                         <button onClick={(e) => { e.stopPropagation(); downloadVariantAsZip(v); showSuccess("Downloading Zip..."); }} className="w-full text-left px-3 py-2 text-xs text-white/70 hover:bg-white/5 hover:text-white flex items-center gap-2"><Download size={12} /> Download Code</button>
                                         <div className="h-px bg-white/5 my-1" />
                                         <button onClick={(e) => startRename(e, v)} className="w-full text-left px-3 py-2 text-xs text-white/70 hover:bg-white/5 flex items-center gap-2"><Edit2 size={12} /> Rename</button>
                                         <button onClick={(e) => handleDelete(e, v.id)} className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2"><Trash2 size={12} /> Delete</button>

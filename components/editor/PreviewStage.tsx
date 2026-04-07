@@ -10,7 +10,7 @@ import {
     Pencil, MousePointer2, Square, Type, Undo2, Eraser, Send, GripVertical, Plus, ArrowLeft
 } from 'lucide-react';
 import { cn, constructSrcDoc, generateId } from '../../utils';
-import { toast } from 'sonner';
+import { showError, showInfo } from '../../utils/toastNotifications';
 import { Annotator, AnnotatorRef, AnnotationTool } from './Annotator';
 import { aiService } from '../../lib/ai/service';
 
@@ -169,7 +169,7 @@ export const PreviewStage = () => {
 
 
     const handleGenerateTheme = () => {
-        toast.info("AI generation for theme variant coming in V3...");
+        showInfo("ℹ AI generation for theme variant coming in V3...");
     };
 
     const handleReload = () => {
@@ -199,7 +199,7 @@ export const PreviewStage = () => {
 
         const apiKey = settings.apiKeys.gemini;
         if (!apiKey) {
-            toast.error("API Key missing");
+            showError("✗ API Key missing");
             return;
         }
 
@@ -231,7 +231,7 @@ export const PreviewStage = () => {
         } catch (e) {
             console.error(e);
             updateVariantStatus(project.id, variant.id, 'error', '// Feedback Iteration Failed');
-            toast.error("Failed to apply feedback");
+            showError("✗ Failed to apply feedback");
         }
     };
 
