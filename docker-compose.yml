@@ -1,0 +1,21 @@
+services:
+  flash-ui-v2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        GEMINI_API_KEY: ${GEMINI_API_KEY}
+    image: flash-ui-v2:latest
+    container_name: flash-ui-v2
+    ports:
+      - "7654:3000"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx
+      - /var/run
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

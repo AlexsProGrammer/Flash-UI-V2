@@ -77,6 +77,29 @@ pnpm build
 pnpm preview
 ```
 
+### Run with Docker Compose
+
+```bash
+# 1) Add your Gemini key to .env in the project root
+echo "GEMINI_API_KEY=your_key_here" > .env
+
+# 2) Build and start the app
+docker compose up --build -d
+```
+
+The app will be available at `http://localhost:7654`.
+
+To stop it:
+
+```bash
+docker compose down
+```
+
+Notes:
+- This setup runs Nginx as a non-root user on internal port `3000` and maps it to host port `7654`.
+- The Compose service uses `read_only`, `tmpfs`, `cap_drop`, and `no-new-privileges` for tighter runtime security.
+- Because this is a Vite frontend, `GEMINI_API_KEY` is injected at build time. Rebuild after changing the key.
+
 ---
 
 ## Tech Stack
